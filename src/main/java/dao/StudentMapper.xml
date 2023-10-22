@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.StudentMapper">
+
+    <!--表的字段名称与实体类的属性名对应-->
+    <resultMap id="studentResultMap" type="entity.Student">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+        <result column="school" property="school"/>
+        <result column="phone" property="phone"/>
+    </resultMap>
+
+    <!--sql片段-->
+    <sql id="studentField">
+        id,name,email,age,school,phone
+    </sql>
+
+    <select id="selectStudents" resultMap="studentResultMap">
+        select id,name,email,age,school,phone from student as s
+        order by id
+    </select>
+
+    <select id="selectStudentById" resultType="entity.Student">
+        select
+        <include refid="studentField"></include>
+        from student where id=#{id}
+    </select>
+
+    <select id="selectMulitObject" resultType="entity.Student">
+        select id,name,email,age,school,phone from student where name=#{name} and age=#{age}
+    </select>
+
+    <select id="selectLikeStudents" parameterType="entity.Student" resultType="entity.Student">
+        select id,name,email,age,school,phone
+        from student
+        <where>
+            <if test="name!=null and name!=''">
+                and name like #{name}
+            </if>
+            <if test="age!=null and age!=''">
+                and age like #{age}
+            </if>
+            <if test="email!=null and email!=''">
+                and email like #{email}
+            </if>
+            <if test="school!=null and school!=''">
+                and school like #{school}
+            </if>
+            <if test="phone!=null and phone!=''">
+                and phone like #{phone}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertStudent" parameterType="entity.Student">
+        insert into student values (#{id},#{name},#{email},#{age},#{school},#{phone})
+    </insert>
+
+    <update id="updateStudent" parameterType="entity.Student">
+        update student set name=#{name},email=#{email},age=#{age},school=#{school},phone=#{phone} where id=#{id}
+    </update>
+
+    <delete id="deleteStudent" parameterType="java.lang.Integer">
+        delete from student where id=#{id}
+    </delete>
+
+    <!--
+       collection:需要遍历的属性
+       item:遍历的变量
+       open:循环前面的sql语句
+       close:循环后面的sql语句
+       separator:分隔符
+    -->
+    <delete id="deleteStudentsByIn" parameterType="entity.Student">
+        delete from student where
+         <foreach collection="ids" item="id" open="id IN(" close=")" separator=",">
+             #{id}
+         </foreach>
+    </delete>
+</mapper>
